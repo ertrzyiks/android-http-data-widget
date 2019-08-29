@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">HTTP Data Widget</string>
+    <string name="appwidget_text">Sample text</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
+</resources>
