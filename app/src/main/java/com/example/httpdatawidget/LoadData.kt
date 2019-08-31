@@ -1,13 +1,18 @@
 package com.example.httpdatawidget
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.AsyncTask
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.*
-import java.net.SocketTimeoutException
 import java.net.URL
+import java.security.cert.X509Certificate
+import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.properties.Delegates
 
 class LoadData() : AsyncTask<Void, Void, String>() {
@@ -21,11 +26,14 @@ class LoadData() : AsyncTask<Void, Void, String>() {
 
     override fun doInBackground(vararg params: Void?): String? {
         val client = OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
+            .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+            .readTimeout(20, TimeUnit.SECONDS)
+            .writeTimeout(20, TimeUnit.SECONDS)
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .followSslRedirects(true)
             .build()
 
         val url = URL("https://papi.ertrzyiks.me/food-time?access_token=123&query=%7BlastEntryDate%28spaceId%3A%20%22f54dc7be-e6ba-4fbe-ac39-935fae3f23c2%22%29%7D")
-//        val url = URL("https://1f95c3a3.ngrok.io/food-time?access_token=123&query=%7BlastEntryDate%28spaceId%3A%226232f3b3-d2e7-4f4e-b3fd-998d6d4eb3ae%22%29%7D")
 
         val request = Request.Builder()
             .url(url)
@@ -41,6 +49,7 @@ class LoadData() : AsyncTask<Void, Void, String>() {
 
             return getText(objData, "data.lastEntryDate")
         } catch (e: Exception) {
+            e.printStackTrace()
             return e.message
         }
     }

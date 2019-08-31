@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import java.lang.Exception
@@ -35,30 +36,24 @@ class RemoteData : AppWidgetProvider() {
         }
     }
 
-    override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
-    }
-
-    override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
-    }
-
     companion object {
 
         internal fun loadAndUpdateData(context: Context, views: RemoteViews, widgetId: Int) {
             views.setViewVisibility(R.id.appwidget_progressbar, View.VISIBLE)
             AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
 
-            LoadData(context, object: LoadDataCallback<String> {
+            LoadData(context, object: LoadDataCallback<String>{
                 override fun onSuccess(value: String) {
-                    views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
                     views.setTextViewText(R.id.appwidget_text, value)
+                    views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
                     AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
 
                 override fun onFailure(e: Exception) {
-
+                    views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
+                    AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
+
             }).execute()
         }
 
@@ -75,9 +70,12 @@ class RemoteData : AppWidgetProvider() {
             val intent = Intent(context, RemoteData::class.java)
             intent.setAction(ACTION_APPWIDGET_UPDATE)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, arrayOf(appWidgetId).toIntArray())
+            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)))
 
             val pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.appwidget_root, pendingIntent)
+
+            appWidgetManager.updateAppWidget(appWidgetId, views)
 
             loadAndUpdateData(context, views, appWidgetId)
         }
