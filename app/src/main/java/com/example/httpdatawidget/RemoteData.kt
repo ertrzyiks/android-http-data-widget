@@ -56,11 +56,13 @@ class RemoteData : AppWidgetProvider() {
                     var text = JsonSource.get(value.body!!.string())
                     views.setTextViewText(R.id.appwidget_text, text)
                     views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
-                    AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
 
                 override fun onFailure(e: Exception) {
                     views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
+                }
+
+                override fun onDone() {
                     AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
 

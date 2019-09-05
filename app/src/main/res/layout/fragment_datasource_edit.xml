@@ -181,7 +181,8 @@
                             android:background="#E7E6E6"
                             android:ellipsize="end"
                             android:maxLines="20"
-                            android:padding="12dp" />
+                            android:padding="12dp"
+                            android:typeface="monospace" />
                     </TableRow>
 
                 </TableLayout>
