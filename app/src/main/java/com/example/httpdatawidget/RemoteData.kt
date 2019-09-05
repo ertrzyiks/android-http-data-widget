@@ -9,6 +9,8 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
+import com.example.httpdatawidget.storage.DatasourceInfo
+import okhttp3.Response
 import java.lang.Exception
 
 /**
@@ -42,9 +44,17 @@ class RemoteData : AppWidgetProvider() {
             views.setViewVisibility(R.id.appwidget_progressbar, View.VISIBLE)
             AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
 
-            LoadData(context, object: LoadDataCallback<String>{
-                override fun onSuccess(value: String) {
-                    views.setTextViewText(R.id.appwidget_text, value)
+            val info = DatasourceInfo(
+                null,
+                "Test",
+                "https://papi.ertrzyiks.me/food-time?access_token=123&query=%7BlastEntryDate%28spaceId%3A%20%22f54dc7be-e6ba-4fbe-ac39-935fae3f23c2%22%29%7D",
+                true
+            )
+
+            LoadData(context, object: LoadDataCallback<Response>{
+                override fun onSuccess(value: Response) {
+                    var text = JsonSource.get(value.body!!.string())
+                    views.setTextViewText(R.id.appwidget_text, text)
                     views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
                     AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
@@ -54,7 +64,7 @@ class RemoteData : AppWidgetProvider() {
                     AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
 
-            }).execute()
+            }).execute(info)
         }
 
         internal fun updateAppWidget(

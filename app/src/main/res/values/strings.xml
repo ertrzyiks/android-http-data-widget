@@ -3,4 +3,7 @@
     <string name="appwidget_text">Sample text</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="textfield_name">Name</string>
+    <string name="textfield_url">URL</string>
+    <string name="button_save">Save</string>
 </resources>

@@ -5,7 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.view.LayoutInflater
+import android.widget.ImageView
 import android.widget.TextView
+import com.example.httpdatawidget.storage.DatasourceInfo
 
 
 class DatasourceListAdapter : ArrayAdapter<DatasourceInfo> {
@@ -22,8 +24,17 @@ class DatasourceListAdapter : ArrayAdapter<DatasourceInfo> {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = inflater.inflate(R.layout.list_item, parent, false)
 
-        var textView = view.findViewById(R.id.textView) as TextView
-        textView.text = getItem(position)?.name
+        val item = getItem(position)
+        val textView = view.findViewById<TextView>(R.id.listitem_name)
+        val imageView = view.findViewById<ImageView>(R.id.imageView)
+
+        textView.text = item?.name
+
+        if (item?.online == true) {
+            imageView.setImageResource(R.drawable.ic_cloud_done_black_24dp)
+        } else {
+            imageView.setImageResource(R.drawable.ic_cloud_off_black_24dp)
+        }
         return view
     }
 }

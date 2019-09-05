@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.ListView
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
+import com.example.httpdatawidget.storage.DatasourceInfo
+import com.example.httpdatawidget.storage.DatasourceInfoBase
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlin.properties.Delegates
 
@@ -23,24 +25,17 @@ import kotlin.properties.Delegates
  */
 class DatasourceList : Fragment() {
     private var db: DatasourceInfoBase? = null
-    private lateinit var dbWorkerThread: DbWorkerThread
     private var listView: ListView by Delegates.notNull()
 
     internal val onButtonClick = View.OnClickListener {
-        println("Click")
-
         Thread(Runnable {
             var item = DatasourceInfo()
-            item.name = "New data source"
             db!!.datasourceInfoDao().insert(item)
         }).start()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        dbWorkerThread = DbWorkerThread("dbWorkerThread")
-        dbWorkerThread.start()
 
         db = DatasourceInfoBase.getInstance(context!!)
     }
@@ -74,11 +69,6 @@ class DatasourceList : Fragment() {
 
         var el: FloatingActionButton = view.findViewById(R.id.add_button)
         el.setOnClickListener(onButtonClick)
-    }
-
-    override fun onDestroy() {
-        dbWorkerThread.quit()
-        super.onDestroy()
     }
 
     /**

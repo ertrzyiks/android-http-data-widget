@@ -1,4 +1,4 @@
-package com.example.httpdatawidget
+package com.example.httpdatawidget.storage
 
 import android.content.Context
 import androidx.room.Database
