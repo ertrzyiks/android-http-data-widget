@@ -3,6 +3,7 @@ package com.example.httpdatawidget
 import android.content.Context
 import android.os.AsyncTask
 import com.example.httpdatawidget.storage.DatasourceInfo
+import com.example.httpdatawidget.storage.DatasourceInfoBase
 import okhttp3.*
 import java.net.URL
 import java.util.*
@@ -56,5 +57,7 @@ class LoadData() : AsyncTask<DatasourceInfo, Void, Response>() {
         } else {
             this.callback.onFailure(exception!!)
         }
+
+        this.callback.onDone()
     }
 }

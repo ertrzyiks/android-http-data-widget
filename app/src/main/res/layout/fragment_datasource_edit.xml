@@ -75,9 +75,8 @@
 
                 <TableLayout
                     android:id="@+id/response_grade_table"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -100,8 +99,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
                             android:text="Response code"
                             android:textStyle="bold" />
 
@@ -109,7 +108,8 @@
                             android:id="@+id/response_code_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1" />
                     </TableRow>
 
                     <TableRow
@@ -129,8 +129,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
                             android:text="Content type"
                             android:textStyle="bold" />
 
@@ -138,7 +138,8 @@
                             android:id="@+id/content_type_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1" />
 
                     </TableRow>
 
@@ -159,16 +160,28 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
                             android:text="Content "
                             android:textStyle="bold" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
                         <TextView
                             android:id="@+id/content_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />
+                            android:layout_gravity="center_vertical"
+                            android:layout_span="3"
+                            android:layout_weight="1"
+                            android:background="#E7E6E6"
+                            android:ellipsize="end"
+                            android:maxLines="20"
+                            android:padding="12dp" />
                     </TableRow>
 
                 </TableLayout>

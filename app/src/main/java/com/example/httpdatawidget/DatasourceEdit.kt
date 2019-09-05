@@ -60,7 +60,6 @@ class DatasourceEdit : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         var view = inflater.inflate(R.layout.fragment_datasource_edit, container, false)
 
         scrollView = view.findViewById(R.id.datasource_edit_scroll_view)
@@ -86,6 +85,8 @@ class DatasourceEdit : Fragment() {
         progressBar = view.findViewById(R.id.response_grade_progress_bar)
         table = view.findViewById(R.id.response_grade_table)
 
+        table.visibility = View.INVISIBLE
+
         Thread(Runnable {
             datasourceInfo = db!!.datasourceInfoDao().findById(itemId!!)
 
@@ -107,10 +108,7 @@ class DatasourceEdit : Fragment() {
         datasourceInfo.url = urlField.text.toString()
     }
 
-    internal val onTestConnection = View.OnClickListener {
-        hideSoftKeyboard()
-        serializeForm()
-
+    internal fun validateUrl(callback: () -> Unit) {
         progressBar.visibility = View.VISIBLE
         table.visibility = View.INVISIBLE
 
@@ -118,13 +116,17 @@ class DatasourceEdit : Fragment() {
             override fun onSuccess(value: Response) {
                 val grader = ResponseGrader(value)
                 responseCodeValue.setText(grader.statusCode())
-                responseCodeIcon.setImageResource(responseCodeIcon(grader))
+                responseCodeIcon.setImageResource(getResponseCodeIcon(grader))
 
                 contentTypeValue.setText(grader.contentType())
+                contentTypeIcon.setImageResource(getContentTypeIcon(grader))
+
                 contentValue.setText(grader.contentSample())
+                contentIcon.setImageResource(getContentIcon(grader))
                 table.visibility = View.VISIBLE
                 progressBar.visibility = View.GONE
-                scrollToElement(responseCodeValue)
+
+                callback.invoke()
             }
 
             override fun onFailure(e: Exception) {
@@ -135,14 +137,39 @@ class DatasourceEdit : Fragment() {
                 contentTypeIcon.setImageResource(R.drawable.ic_warning_black_24dp)
                 table.visibility = View.VISIBLE
                 progressBar.visibility = View.GONE
+
+                callback.invoke()
             }
-
-
         }).execute(datasourceInfo)
     }
 
-    internal fun responseCodeIcon(grader: ResponseGrader): Int {
+    internal val onTestConnection = View.OnClickListener {
+        hideSoftKeyboard()
+        serializeForm()
+
+        validateUrl {
+            scrollToElement(responseCodeValue)
+        }
+    }
+
+    internal fun getResponseCodeIcon(grader: ResponseGrader): Int {
         if (grader.isStatusCodeOk()) {
+            return R.drawable.ic_check_black_24dp
+        }
+
+        return R.drawable.ic_warning_black_24dp
+    }
+
+    internal fun getContentTypeIcon(grader: ResponseGrader): Int {
+        if (grader.isContentTypeOk()) {
+            return R.drawable.ic_check_black_24dp
+        }
+
+        return R.drawable.ic_warning_black_24dp
+    }
+
+    internal fun getContentIcon(grader: ResponseGrader): Int {
+        if (grader.isContentOk()) {
             return R.drawable.ic_check_black_24dp
         }
 
@@ -153,13 +180,31 @@ class DatasourceEdit : Fragment() {
         hideSoftKeyboard()
         serializeForm()
 
-        Thread(Runnable {
-            db!!.datasourceInfoDao().update(datasourceInfo)
+        table.visibility = View.INVISIBLE
+        progressBar.visibility = View.VISIBLE
 
-            getActivity()?.runOnUiThread {
-                Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
+        LoadData(context!!, object: LoadDataCallback<Response>{
+            override fun onSuccess(value: Response) {
+                val grader = ResponseGrader(value)
+                datasourceInfo.online = grader.isStatusCodeOk()
             }
-        }).start()
+
+            override fun onFailure(e: Exception) {
+                datasourceInfo.online = false
+            }
+
+            override fun onDone() {
+                progressBar.visibility = View.GONE
+
+                Thread(Runnable {
+                    db!!.datasourceInfoDao().update(datasourceInfo)
+
+                    getActivity()?.runOnUiThread {
+                        Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
+                    }
+                }).start()
+            }
+        }).execute(datasourceInfo)
     }
 
     internal val onFocusChange = View.OnFocusChangeListener { view, focused ->
