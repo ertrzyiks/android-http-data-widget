@@ -24,7 +24,7 @@ class LoadData() : AsyncTask<DatasourceInfo, Void, Response>() {
 
     override fun doInBackground(vararg params: DatasourceInfo): Response? {
         val client = OkHttpClient.Builder()
-            .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+            .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)

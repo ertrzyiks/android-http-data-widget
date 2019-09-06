@@ -123,18 +123,18 @@ class DatasourceEdit : Fragment() {
 
                 contentValue.setText(grader.contentSample())
                 contentIcon.setImageResource(getContentIcon(grader))
-                table.visibility = View.VISIBLE
-                progressBar.visibility = View.GONE
-
-                callback.invoke()
             }
 
             override fun onFailure(e: Exception) {
-                contentValue.setText(e.message)
                 responseCodeValue.setText("?")
                 responseCodeIcon.setImageResource(R.drawable.ic_warning_black_24dp)
                 contentTypeValue.setText("?")
                 contentTypeIcon.setImageResource(R.drawable.ic_warning_black_24dp)
+                contentValue.setText(e.message)
+                contentIcon.setImageResource(R.drawable.ic_warning_black_24dp)
+            }
+
+            override fun onDone() {
                 table.visibility = View.VISIBLE
                 progressBar.visibility = View.GONE
 

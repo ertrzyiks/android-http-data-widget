@@ -3,9 +3,15 @@ package com.example.httpdatawidget
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.Response
 
-class ResponseGrader(
-    protected val response: Response
-) {
+class ResponseGrader {
+   protected var response: Response
+   protected var responseBody: String
+
+   constructor(response: Response) {
+      this.response = response
+      this.responseBody = response.body!!.string()
+   }
+
    fun isStatusCodeOk() : Boolean {
        return response.code in 200..299
    }
@@ -17,10 +23,12 @@ class ResponseGrader(
   fun isContentOk(): Boolean {
       try {
         val mapperAll = ObjectMapper()
-        mapperAll.readTree(response.body!!.string())
+        mapperAll.readTree(responseBody)
+
         return true
       }
       catch(e: Exception) {
+          e.printStackTrace()
       }
 
       return false
@@ -41,12 +49,10 @@ class ResponseGrader(
   }
 
   fun contentSample(): String {
-      val content = response.body!!.string()
-
-      if (content == "") {
+      if (responseBody == "") {
           return "(empty)"
       }
 
-      return content
+      return responseBody
   }
 }
