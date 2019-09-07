@@ -1,7 +1,6 @@
 package com.example.httpdatawidget
 
 import android.app.Activity
-import android.os.AsyncTask
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -213,6 +212,7 @@ class DatasourceEdit : Fragment() {
                 db!!.datasourceInfoDao().update(datasourceInfo)
 
                 getActivity()?.runOnUiThread {
+                    testConnectionButton.isEnabled = true
                     Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
                 }
             }).start()
@@ -220,6 +220,7 @@ class DatasourceEdit : Fragment() {
     }
 
     internal val onSave = View.OnClickListener {
+        testConnectionButton.isEnabled = false
         hideSoftKeyboard()
         serializeForm()
 
