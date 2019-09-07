@@ -3,7 +3,6 @@ package com.example.httpdatawidget
 import android.content.Context
 import android.os.AsyncTask
 import com.example.httpdatawidget.storage.DatasourceInfo
-import com.example.httpdatawidget.storage.DatasourceInfoBase
 import okhttp3.*
 import java.net.URL
 import java.util.*
@@ -41,12 +40,28 @@ class LoadData() : AsyncTask<DatasourceInfo, Void, Response>() {
                 .get()
                 .build()
 
-            return client.newCall(request).execute()
+            val serverResponse = client.newCall(request).execute()
+
+            return Response(
+                contentType(serverResponse),
+                serverResponse.body?.string() ?: "",
+                serverResponse.code
+            )
         } catch (e: Exception) {
             exception = e
         }
 
         return null
+    }
+
+    fun contentType(response: okhttp3.Response): String {
+        var contentTypeHeader = response.header("Content-type")
+
+        if (contentTypeHeader === null) {
+            return "Unknown"
+        }
+
+        return contentTypeHeader.split(";")[0]
     }
 
     override fun onPostExecute(result: Response?) {

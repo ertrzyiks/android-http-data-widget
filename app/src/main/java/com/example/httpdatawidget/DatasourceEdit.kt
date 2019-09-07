@@ -1,17 +1,16 @@
 package com.example.httpdatawidget
 
 import android.app.Activity
+import android.os.AsyncTask
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.LruCache
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import com.google.android.material.textfield.TextInputEditText
-import okhttp3.Response
 import java.lang.Exception
 import android.widget.*
 import com.example.httpdatawidget.storage.DatasourceInfo
@@ -32,8 +31,7 @@ class DatasourceEdit : Fragment() {
     private lateinit var datasourceInfo: DatasourceInfo
     private var db: DatasourceInfoBase? = null
 
-    private lateinit var cache: LruCache<String, Boolean>
-    private var dirtyDatasourceRequest = false
+    private var requestVerified = true
 
     private lateinit var nameField: TextInputEditText
     private lateinit var urlField: TextInputEditText
@@ -52,6 +50,8 @@ class DatasourceEdit : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var table: TableLayout
 
+    private var lastValidate: LoadData? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -59,7 +59,6 @@ class DatasourceEdit : Fragment() {
         }
 
         db = DatasourceInfoBase.getInstance(context!!)
-        cache = LruCache(100)
     }
 
     override fun onCreateView(
@@ -80,7 +79,7 @@ class DatasourceEdit : Fragment() {
             override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(text: Editable?) {
-                dirtyDatasourceRequest = true
+                requestVerified = false
             }
         })
 
@@ -111,7 +110,7 @@ class DatasourceEdit : Fragment() {
 
                 saveButton.isEnabled = true
                 testConnectionButton.isEnabled = true
-                dirtyDatasourceRequest = false
+                requestVerified = true
             }
         }).start()
 
@@ -125,22 +124,23 @@ class DatasourceEdit : Fragment() {
     }
 
     internal fun validateUrl(callback: () -> Unit) {
+        requestVerified = false
         progressBar.visibility = View.VISIBLE
         table.visibility = View.INVISIBLE
 
-        LoadData(context!!, object: LoadDataCallback<Response>{
+        lastValidate = LoadData(context!!, object: LoadDataCallback<Response>{
             override fun onSuccess(value: Response) {
                 val grader = ResponseGrader(value)
-                responseCodeValue.setText(grader.statusCode())
+                responseCodeValue.setText(value.statusCode.toString())
                 responseCodeIcon.setImageResource(getResponseCodeIcon(grader))
 
-                contentTypeValue.setText(grader.contentType())
+                contentTypeValue.setText(value.contentType)
                 contentTypeIcon.setImageResource(getContentTypeIcon(grader))
 
                 contentValue.setText(grader.contentSample())
                 contentIcon.setImageResource(getContentIcon(grader))
 
-                cache.put(datasourceInfo.toIdentityString(), grader.isStatusCodeOk())
+                requestVerified = grader.isStatusCodeOk()
             }
 
             override fun onFailure(e: Exception) {
@@ -158,7 +158,9 @@ class DatasourceEdit : Fragment() {
 
                 callback.invoke()
             }
-        }).execute(datasourceInfo)
+        })
+
+        lastValidate?.execute(datasourceInfo)
     }
 
     internal val onTestConnection = View.OnClickListener {
@@ -205,7 +207,6 @@ class DatasourceEdit : Fragment() {
         }
 
         override fun onDone() {
-            dirtyDatasourceRequest = false
             progressBar.visibility = View.GONE
 
             Thread(Runnable {
@@ -222,19 +223,17 @@ class DatasourceEdit : Fragment() {
         hideSoftKeyboard()
         serializeForm()
 
-        val isOnline = cache.get(datasourceInfo.toIdentityString())
+        lastValidate?.cancel(true)
 
-        if (!dirtyDatasourceRequest) {
+        if (requestVerified) {
+            datasourceInfo.online = true
             saveListener.onDone()
         }
-        else if (isOnline === null) {
+        else {
             table.visibility = View.INVISIBLE
             progressBar.visibility = View.VISIBLE
 
             LoadData(context!!, saveListener).execute(datasourceInfo)
-        } else {
-            datasourceInfo.online = isOnline
-            saveListener.onDone()
         }
     }
 

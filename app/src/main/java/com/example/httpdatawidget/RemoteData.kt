@@ -10,7 +10,6 @@ import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import com.example.httpdatawidget.storage.DatasourceInfo
-import okhttp3.Response
 import java.lang.Exception
 
 /**
@@ -53,7 +52,7 @@ class RemoteData : AppWidgetProvider() {
 
             LoadData(context, object: LoadDataCallback<Response>{
                 override fun onSuccess(value: Response) {
-                    var text = JsonSource.get(value.body!!.string())
+                    var text = JsonSource.get(value.contentBody)
                     views.setTextViewText(R.id.appwidget_text, text)
                     views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
                 }
