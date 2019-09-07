@@ -16,6 +16,11 @@ data class DatasourceInfo(
     constructor():this(null,
         defaultName, "", false)
 
+
+    fun toIdentityString() : String {
+        return url
+    }
+
     companion object {
         val defaultName = "My Data Source"
     }

@@ -1,8 +1,10 @@
 package com.example.httpdatawidget
 
 import android.app.Activity
-import android.opengl.Visibility
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.LruCache
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +32,9 @@ class DatasourceEdit : Fragment() {
     private lateinit var datasourceInfo: DatasourceInfo
     private var db: DatasourceInfoBase? = null
 
+    private lateinit var cache: LruCache<String, Boolean>
+    private var dirtyDatasourceRequest = false
+
     private lateinit var nameField: TextInputEditText
     private lateinit var urlField: TextInputEditText
     private lateinit var saveButton: Button
@@ -54,6 +59,7 @@ class DatasourceEdit : Fragment() {
         }
 
         db = DatasourceInfoBase.getInstance(context!!)
+        cache = LruCache(100)
     }
 
     override fun onCreateView(
@@ -68,6 +74,15 @@ class DatasourceEdit : Fragment() {
         nameField.setOnFocusChangeListener(onFocusChange)
 
         urlField = view.findViewById(R.id.field_datasource_url)
+        urlField.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(text: Editable?) {
+                dirtyDatasourceRequest = true
+            }
+        })
 
         saveButton = view.findViewById(R.id.save_button)
         saveButton.setOnClickListener(onSave)
@@ -96,6 +111,7 @@ class DatasourceEdit : Fragment() {
 
                 saveButton.isEnabled = true
                 testConnectionButton.isEnabled = true
+                dirtyDatasourceRequest = false
             }
         }).start()
 
@@ -123,6 +139,8 @@ class DatasourceEdit : Fragment() {
 
                 contentValue.setText(grader.contentSample())
                 contentIcon.setImageResource(getContentIcon(grader))
+
+                cache.put(datasourceInfo.toIdentityString(), grader.isStatusCodeOk())
             }
 
             override fun onFailure(e: Exception) {
@@ -176,35 +194,48 @@ class DatasourceEdit : Fragment() {
         return R.drawable.ic_warning_black_24dp
     }
 
+    internal val saveListener = object: LoadDataCallback<Response>{
+        override fun onSuccess(value: Response) {
+            val grader = ResponseGrader(value)
+            datasourceInfo.online = grader.isStatusCodeOk()
+        }
+
+        override fun onFailure(e: Exception) {
+            datasourceInfo.online = false
+        }
+
+        override fun onDone() {
+            dirtyDatasourceRequest = false
+            progressBar.visibility = View.GONE
+
+            Thread(Runnable {
+                db!!.datasourceInfoDao().update(datasourceInfo)
+
+                getActivity()?.runOnUiThread {
+                    Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
+                }
+            }).start()
+        }
+    }
+
     internal val onSave = View.OnClickListener {
         hideSoftKeyboard()
         serializeForm()
 
-        table.visibility = View.INVISIBLE
-        progressBar.visibility = View.VISIBLE
+        val isOnline = cache.get(datasourceInfo.toIdentityString())
 
-        LoadData(context!!, object: LoadDataCallback<Response>{
-            override fun onSuccess(value: Response) {
-                val grader = ResponseGrader(value)
-                datasourceInfo.online = grader.isStatusCodeOk()
-            }
+        if (!dirtyDatasourceRequest) {
+            saveListener.onDone()
+        }
+        else if (isOnline === null) {
+            table.visibility = View.INVISIBLE
+            progressBar.visibility = View.VISIBLE
 
-            override fun onFailure(e: Exception) {
-                datasourceInfo.online = false
-            }
-
-            override fun onDone() {
-                progressBar.visibility = View.GONE
-
-                Thread(Runnable {
-                    db!!.datasourceInfoDao().update(datasourceInfo)
-
-                    getActivity()?.runOnUiThread {
-                        Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
-                    }
-                }).start()
-            }
-        }).execute(datasourceInfo)
+            LoadData(context!!, saveListener).execute(datasourceInfo)
+        } else {
+            datasourceInfo.online = isOnline
+            saveListener.onDone()
+        }
     }
 
     internal val onFocusChange = View.OnFocusChangeListener { view, focused ->
