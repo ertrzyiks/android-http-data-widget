@@ -53,15 +53,15 @@ class RemoteData : AppWidgetProvider() {
             LoadData(context, object: LoadDataCallback<Response>{
                 override fun onSuccess(value: Response) {
                     var text = JsonSource.get(value.contentBody)
-                    views.setTextViewText(R.id.appwidget_text, text)
-                    views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
+//                    views.setTextViewText(R.id.appwidget_text, text)
                 }
 
                 override fun onFailure(e: Exception) {
-                    views.setViewVisibility(R.id.appwidget_progressbar, View.GONE)
+                    //                    views.setTextViewText(R.id.appwidget_text, e.message)
                 }
 
                 override fun onDone() {
+                    views.setViewVisibility(R.id.appwidget_progressbar, View.INVISIBLE)
                     AppWidgetManager.getInstance(context).updateAppWidget(widgetId, views)
                 }
 
@@ -76,7 +76,7 @@ class RemoteData : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.remote_data)
 
             val widgetText = RemoteDataConfigureActivity.loadTitlePref(context, appWidgetId)
-            views.setTextViewText(R.id.appwidget_label, widgetText)
+//            views.setTextViewText(R.id.appwidget_label, widgetText)
 
             val intent = Intent(context, RemoteData::class.java)
             intent.setAction(ACTION_APPWIDGET_UPDATE)
