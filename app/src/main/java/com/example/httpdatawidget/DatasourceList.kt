@@ -10,7 +10,7 @@ import android.widget.ListView
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import com.example.httpdatawidget.storage.DatasourceInfo
-import com.example.httpdatawidget.storage.DatasourceInfoBase
+import com.example.httpdatawidget.storage.AppDatabase
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlin.properties.Delegates
 
@@ -24,7 +24,7 @@ import kotlin.properties.Delegates
  * create an instance of this fragment.
  */
 class DatasourceList : Fragment() {
-    private var db: DatasourceInfoBase? = null
+    private var db: AppDatabase? = null
     private var listView: ListView by Delegates.notNull()
 
     internal val onButtonClick = View.OnClickListener {
@@ -37,7 +37,7 @@ class DatasourceList : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        db = DatasourceInfoBase.getInstance(context!!)
+        db = AppDatabase.getInstance(context!!)
     }
 
     override fun onCreateView(

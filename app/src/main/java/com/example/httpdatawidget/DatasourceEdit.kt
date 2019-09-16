@@ -2,8 +2,6 @@ package com.example.httpdatawidget
 
 import android.app.Activity
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +10,9 @@ import android.view.inputmethod.InputMethodManager
 import com.google.android.material.textfield.TextInputEditText
 import java.lang.Exception
 import android.widget.*
+import androidx.navigation.fragment.NavHostFragment
 import com.example.httpdatawidget.storage.DatasourceInfo
-import com.example.httpdatawidget.storage.DatasourceInfoBase
+import com.example.httpdatawidget.storage.AppDatabase
 
 private const val ARG_ITEM_ID = "itemId"
 
@@ -28,9 +27,7 @@ private const val ARG_ITEM_ID = "itemId"
 class DatasourceEdit : Fragment() {
     private var itemId: Long? = null
     private lateinit var datasourceInfo: DatasourceInfo
-    private var db: DatasourceInfoBase? = null
-
-    private var requestVerified = true
+    private var db: AppDatabase? = null
 
     private lateinit var nameField: TextInputEditText
     private lateinit var urlField: TextInputEditText
@@ -57,7 +54,7 @@ class DatasourceEdit : Fragment() {
             itemId = it.getLong(ARG_ITEM_ID)
         }
 
-        db = DatasourceInfoBase.getInstance(context!!)
+        db = AppDatabase.getInstance(context!!)
     }
 
     override fun onCreateView(
@@ -72,15 +69,6 @@ class DatasourceEdit : Fragment() {
         nameField.setOnFocusChangeListener(onFocusChange)
 
         urlField = view.findViewById(R.id.field_datasource_url)
-        urlField.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(text: Editable?) {
-                requestVerified = false
-            }
-        })
 
         saveButton = view.findViewById(R.id.save_button)
         saveButton.setOnClickListener(onSave)
@@ -109,7 +97,6 @@ class DatasourceEdit : Fragment() {
 
                 saveButton.isEnabled = true
                 testConnectionButton.isEnabled = true
-                requestVerified = true
             }
         }).start()
 
@@ -123,7 +110,6 @@ class DatasourceEdit : Fragment() {
     }
 
     internal fun validateUrl(callback: () -> Unit) {
-        requestVerified = false
         progressBar.visibility = View.VISIBLE
         table.visibility = View.INVISIBLE
 
@@ -138,8 +124,6 @@ class DatasourceEdit : Fragment() {
 
                 contentValue.setText(grader.contentSample())
                 contentIcon.setImageResource(getContentIcon(grader))
-
-                requestVerified = grader.isStatusCodeOk()
             }
 
             override fun onFailure(e: Exception) {
@@ -195,47 +179,24 @@ class DatasourceEdit : Fragment() {
         return R.drawable.ic_warning_black_24dp
     }
 
-    internal val saveListener = object: LoadDataCallback<Response>{
-        override fun onSuccess(value: Response) {
-            val grader = ResponseGrader(value)
-            datasourceInfo.online = grader.isStatusCodeOk()
-        }
-
-        override fun onFailure(e: Exception) {
-            datasourceInfo.online = false
-        }
-
-        override fun onDone() {
-            progressBar.visibility = View.GONE
-
-            Thread(Runnable {
-                db!!.datasourceInfoDao().update(datasourceInfo)
-
-                getActivity()?.runOnUiThread {
-                    testConnectionButton.isEnabled = true
-                    Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
-                }
-            }).start()
-        }
-    }
 
     internal val onSave = View.OnClickListener {
-        testConnectionButton.isEnabled = false
         hideSoftKeyboard()
         serializeForm()
 
         lastValidate?.cancel(true)
 
-        if (requestVerified) {
-            datasourceInfo.online = true
-            saveListener.onDone()
-        }
-        else {
-            table.visibility = View.INVISIBLE
-            progressBar.visibility = View.VISIBLE
+        Thread(Runnable {
+            db!!.datasourceInfoDao().update(datasourceInfo)
 
-            LoadData(context!!, saveListener).execute(datasourceInfo)
-        }
+            getActivity()?.runOnUiThread {
+                testConnectionButton.isEnabled = true
+                Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
+
+                val controller = NavHostFragment.findNavController(this)
+                controller.navigateUp()
+            }
+        }).start()
     }
 
     internal val onFocusChange = View.OnFocusChangeListener { view, focused ->

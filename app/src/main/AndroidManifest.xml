@@ -22,7 +22,7 @@
                 android:resource="@xml/remote_data_info" />
         </receiver>
 
-        <activity android:name=".RemoteDataConfigureActivity">
+        <activity android:name=".RemoteDataConfigureActivity" android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
