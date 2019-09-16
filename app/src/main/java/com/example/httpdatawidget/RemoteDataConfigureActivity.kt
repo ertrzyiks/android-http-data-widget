@@ -4,16 +4,25 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
 import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.httpdatawidget.storage.AppDatabase
 import com.example.httpdatawidget.storage.DatasourceInfo
 import com.example.httpdatawidget.storage.WidgetConfig
+import android.widget.Toast
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+
 
 /**
  * The configuration screen for the [RemoteData] AppWidget.
@@ -70,6 +79,22 @@ class RemoteDataConfigureActivity : AppCompatActivity(), AdapterView.OnItemSelec
         mAppWidgetLabel = findViewById<EditText>(R.id.appwidget_label)
         mAppWidgetPath = findViewById<EditText>(R.id.appwidget_path)
         findViewById<View>(R.id.add_button).setOnClickListener(mOnClickListener)
+
+        val appWidgetDatasourceHint = findViewById<TextView>(R.id.appwidget_configure_datasource_hint)
+        val indexOfCreate = appWidgetDatasourceHint.text.indexOf("create new one")
+        val spanable = SpannableString(appWidgetDatasourceHint.text)
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(textView: View) {
+                val intent = Intent(applicationContext, MainActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
+        spanable.setSpan(clickableSpan, indexOfCreate, indexOfCreate + "create new one".length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spanable.setSpan(ForegroundColorSpan(Color.parseColor("#0000FF")), indexOfCreate, indexOfCreate + "create new one".length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        appWidgetDatasourceHint.movementMethod = LinkMovementMethod.getInstance()
+        appWidgetDatasourceHint.text = spanable
 
         // Find the widget id from the intent.
         val intent = intent

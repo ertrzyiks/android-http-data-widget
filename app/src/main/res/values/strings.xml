@@ -3,7 +3,7 @@
     <string name="appwidget_label">Label</string>
     <string name="appwidget_label_hint">Presented on the widget above the value from the server.</string>
     <string name="appwidget_datasource">Datasource</string>
-    <string name="appwidget_datasource_hint">HTTP request issued to retrieve data for the widget.</string>
+    <string name="appwidget_datasource_hint">HTTP request issued to retrieve data for the widget. Select existing or create new one.</string>
     <string name="appwidget_path">Path</string>
     <string name="appwidget_path_hint">Response field that will be retrieved and displayed on the widget. For example: data.post.title</string>
     <string name="appwidget_content">Loading...</string>

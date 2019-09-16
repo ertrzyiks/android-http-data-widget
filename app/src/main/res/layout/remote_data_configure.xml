@@ -67,6 +67,7 @@
                 android:spinnerMode="dialog" />
 
             <TextView
+                android:id="@+id/appwidget_configure_datasource_hint"
                 style="@style/Hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
