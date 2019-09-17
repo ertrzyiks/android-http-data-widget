@@ -109,6 +109,20 @@ class DatasourceEdit : Fragment() {
         datasourceInfo.url = urlField.text.toString()
     }
 
+    internal fun validate(): Boolean {
+        val text = urlField.text!!
+        var result = true
+
+        if (!text.startsWith("http://") && !text.startsWith("https://")) {
+            urlField.setError("Must start with http:// or https://")
+            result = false
+        } else {
+            urlField.setError(null)
+        }
+
+        return result
+    }
+
     internal fun validateUrl(callback: () -> Unit) {
         progressBar.visibility = View.VISIBLE
         table.visibility = View.INVISIBLE
@@ -181,6 +195,10 @@ class DatasourceEdit : Fragment() {
 
 
     internal val onSave = View.OnClickListener {
+        if (!validate()) {
+            return@OnClickListener
+        }
+
         hideSoftKeyboard()
         serializeForm()
 
@@ -191,7 +209,6 @@ class DatasourceEdit : Fragment() {
 
             getActivity()?.runOnUiThread {
                 testConnectionButton.isEnabled = true
-                Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT)
 
                 val controller = NavHostFragment.findNavController(this)
                 controller.navigateUp()
@@ -226,7 +243,6 @@ class DatasourceEdit : Fragment() {
     }
 
     companion object {
-
         @JvmStatic
         fun newInstance(itemId: Long) =
             DatasourceEdit().apply {
