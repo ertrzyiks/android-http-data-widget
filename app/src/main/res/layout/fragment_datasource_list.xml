@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".DatasourceList">
 
+    <TextView
+        android:id="@+id/list_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:padding="8dp"
+        android:text="No datasources yet"
+        android:textAlignment="center"
+        android:textSize="18sp" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">

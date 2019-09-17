@@ -52,6 +52,7 @@ class DatasourceList : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         listView = view.findViewById(R.id.list)
+        listView.emptyView = view.findViewById(R.id.list_empty_view)
 
         listView.setOnItemClickListener { parent, view, position, id ->
             val selectedItem = listView.adapter.getItem(position) as DatasourceInfo
