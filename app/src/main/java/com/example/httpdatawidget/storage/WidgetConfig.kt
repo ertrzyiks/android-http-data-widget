@@ -18,8 +18,9 @@ data class WidgetConfig(
 
     @ColumnInfo(name = "datasource_info_id") var datasource_info_id: Long?,
     @ColumnInfo(name = "path") var path: String,
-    @ColumnInfo(name = "theme") var theme: String) {
+    @ColumnInfo(name = "theme") var theme: String,
+    @ColumnInfo(name = "update_interval_in_minutes") var update_interval_in_minutes: Int) {
 
     constructor(widgetId: Int):this(null,
-        "", widgetId, null, "", "default")
+        "", widgetId, null, "", "default", 0)
 }

@@ -14,19 +14,17 @@ abstract class AppDatabase : RoomDatabase() {
 
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase? {
+        fun getInstance(context: Context): AppDatabase {
             if (INSTANCE == null) {
                 synchronized(AppDatabase::class) {
-                    println("INSTANCE" + INSTANCE)
-                    INSTANCE = Room.inMemoryDatabaseBuilder(context.getApplicationContext(),
-                        AppDatabase::class.java)
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                        AppDatabase::class.java,
+                        "remote_data_widget")
                         .build()
-
-                    println("INSTANCE2" + INSTANCE)
 
                 }
             }
-            return INSTANCE
+            return INSTANCE!!
         }
     }
 }

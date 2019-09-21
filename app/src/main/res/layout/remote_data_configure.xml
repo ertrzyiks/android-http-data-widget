@@ -17,7 +17,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:padding="16dp">
 
@@ -95,6 +95,38 @@
                     android:layout_weight="1"
                     android:text="@string/appwidget_path_hint" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                style="@style/Divider.Horizontal.Padded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/appwidget_interval"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/appwidget_configure_interval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="Manually only"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+            <SeekBar
+                android:id="@+id/appwidget_configure_seekbar"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="10"
+                android:progress="5"
+                android:progressBackgroundTint="#4E4E4E" />
+
         </LinearLayout>
     </ScrollView>
 

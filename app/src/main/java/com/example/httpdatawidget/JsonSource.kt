@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 
 class JsonSource {
     companion object {
-        fun get (responseBody: String): String {
+        fun get (responseBody: String, path: String): String {
             val mapperAll = ObjectMapper()
             val objData = mapperAll.readTree(responseBody)
 
-            return getText(objData, "data.lastEntryDate")
+            return getText(objData, path)
         }
 
         internal fun getText(objData: JsonNode, path: String): String {
@@ -19,7 +19,7 @@ class JsonSource {
                 currentNode = currentNode.path(it)
             }
 
-            return currentNode.asText("Failed to read " + path)
+            return currentNode.asText("Path not found: " + path)
         }
     }
 }

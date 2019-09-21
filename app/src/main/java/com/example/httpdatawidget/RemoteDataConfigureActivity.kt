@@ -10,18 +10,14 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.view.View
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.httpdatawidget.storage.AppDatabase
 import com.example.httpdatawidget.storage.DatasourceInfo
 import com.example.httpdatawidget.storage.WidgetConfig
-import android.widget.Toast
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
+import android.widget.*
 
 
 /**
@@ -31,6 +27,8 @@ class RemoteDataConfigureActivity : AppCompatActivity(), AdapterView.OnItemSelec
     internal var mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     internal var mAppWidgetLabel: EditText? = null
     internal var mAppWidgetPath: EditText? = null
+    internal var mAppWidgetInterval: TextView? = null
+    internal var mSeekBar: SeekBar? = null
     internal var db: AppDatabase? = null
     internal var mWidgetConfig: WidgetConfig? = null
 
@@ -78,6 +76,8 @@ class RemoteDataConfigureActivity : AppCompatActivity(), AdapterView.OnItemSelec
         setContentView(R.layout.remote_data_configure)
         mAppWidgetLabel = findViewById<EditText>(R.id.appwidget_label)
         mAppWidgetPath = findViewById<EditText>(R.id.appwidget_path)
+        mAppWidgetInterval = findViewById(R.id.appwidget_configure_interval)
+        mSeekBar = findViewById(R.id.appwidget_configure_seekbar)
         findViewById<View>(R.id.add_button).setOnClickListener(mOnClickListener)
 
         val appWidgetDatasourceHint = findViewById<TextView>(R.id.appwidget_configure_datasource_hint)
@@ -95,6 +95,9 @@ class RemoteDataConfigureActivity : AppCompatActivity(), AdapterView.OnItemSelec
 
         appWidgetDatasourceHint.movementMethod = LinkMovementMethod.getInstance()
         appWidgetDatasourceHint.text = spanable
+
+        mSeekBar?.max = AutoUpdateInterval.totalOptions() - 1
+        mSeekBar?.setOnSeekBarChangeListener(onSeekBarChange)
 
         // Find the widget id from the intent.
         val intent = intent
@@ -132,6 +135,7 @@ class RemoteDataConfigureActivity : AppCompatActivity(), AdapterView.OnItemSelec
             runOnUiThread {
                 mAppWidgetLabel?.setText(mWidgetConfig?.label ?: "Title")
                 mAppWidgetPath?.setText(mWidgetConfig?.path ?: "")
+                mSeekBar?.progress = AutoUpdateInterval.indexForInterval(mWidgetConfig?.update_interval_in_minutes ?: 0)
 
                 db!!.datasourceInfoDao().getAll().observe(this, Observer {
                     adapter.clear()
@@ -144,6 +148,16 @@ class RemoteDataConfigureActivity : AppCompatActivity(), AdapterView.OnItemSelec
                 })
             }
         }.start()
+    }
+
+    internal val onSeekBarChange = object: SeekBar.OnSeekBarChangeListener {
+        override fun onStartTrackingTouch(p0: SeekBar?) {}
+        override fun onStopTrackingTouch(p0: SeekBar?) {}
+
+        override fun onProgressChanged(bar: SeekBar?, progress: Int, fromUser: Boolean) {
+            mAppWidgetInterval?.text = AutoUpdateInterval.labelForIndex(progress)
+            mWidgetConfig?.update_interval_in_minutes = AutoUpdateInterval.valueForIndex(progress)
+        }
     }
 
     companion object {
